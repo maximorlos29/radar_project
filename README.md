@@ -31,3 +31,5 @@ This project is a functional radar system built using the **ESP32-WROVER microco
 1. Connect the ultrasonic sensor to the ESP32 as per the wiring diagram.
 2. Attach the servo motors for scanning.
 4. Ensure all connections are secure and powered correctly.
+
+## System's Presentation

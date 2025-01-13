@@ -35,5 +35,5 @@ This project is a functional radar system built using the **ESP32-WROVER microco
 ### Software Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/radar-project.git
+   git clone https://github.com/maximorlos29/radar-project.git
    cd radar-project

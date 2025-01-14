@@ -2,7 +2,7 @@
 #include <WebServer.h> // for serving the web app
 #include <SPIFFS.h>
 #include <WebSocketsServer.h> //for the communication between the external device and the radar
-  WebSocketsServer webSocket = WebSocketsServer(81);
+WebSocketsServer webSocket = WebSocketsServer(81);
 WebServer webServer = WebServer(80);
 const int RotorPin = 13;
 const int TRIG_PIN =32;
@@ -16,37 +16,16 @@ void setup() {
   Serial.begin(9600);
   setupWiFiAP();
   setupWebSocket();
-  if(!SPIFFS.begin()){
+  if(!SPIFFS.begin(true)){
     Serial.println("Failed to mount SPIFFS");
     return;
   }
-  webServer.on("/", HTTP_GET, [](){
-    File file = SPIFFS.open("/index.html", "r");
-    if(!file){
-      webServer.send(404,"text/plain", "File Not Found");
-      return;
-    }
-    webServer.streamFile(file,"text/html");
-    file.close();
-  });
-  webServer.on("/style.css", HTTP_GET, [](){
-    File file = SPIFFS.open("/style.css", "r");
-    if(!file){
-      webServer.send(404,"text/plain", "File Not Found");
-      return;
-    }
-    webServer.streamFile(file,"text/css");
-    file.close();
-  });
-  webServer.on("/script.js", HTTP_GET, [](){
-    File file = SPIFFS.open("/script.js", "r");
-    if(!file){
-      webServer.send(404,"text/plain", "File Not Found");
-      return;
-    }
-    webServer.streamFile(file,"application/javascript");
-    file.close();
-  });
+  else{
+    Serial.println("Succeded to mount SPIFFS");
+  }
+  webServer.on("/", HTTP_GET,handleRoot); // path of the root, when a user asks for the root
+  webServer.on("/style.css", HTTP_GET,handleCSS);
+  webServer.on("/script.js", HTTP_GET, handleJS);
   webServer.begin();
   Serial.println("Server is opened");
 }
@@ -130,4 +109,31 @@ void setupWebSocket(){
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
   Serial.println("WebSocket server started");
+}
+void handleRoot(){
+  File file = SPIFFS.open("/index.html", "r");
+    if(!file){
+      webServer.send(404,"text/plain", "File Not Found");
+      return;
+    }
+    webServer.streamFile(file,"text/html");
+    file.close();
+}
+void handleCSS(){
+  File file = SPIFFS.open("/style.css", "r");
+    if(!file){
+      webServer.send(404,"text/plain", "File Not Found");
+      return;
+    }
+    webServer.streamFile(file,"text/css");
+    file.close();
+}
+void handleJS(){
+  File file = SPIFFS.open("/script.js", "r");
+    if(!file){
+      webServer.send(404,"text/plain", "File Not Found");
+      return;
+    }
+    webServer.streamFile(file,"application/javascript");
+    file.close();
 }

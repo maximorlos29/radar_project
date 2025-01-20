@@ -7,7 +7,10 @@ WebServer webServer = WebServer(80);
 const int RotorPin = 13;
 const int TRIG_PIN =32;
 const int ECHO_PIN =35;
-
+bool forward = true;
+const int maximalPWMSignal = 2400;
+const int minimalPWMSignal =0;
+int currentPWMSignal =0;
 
 void setup() {
   pinMode(RotorPin,OUTPUT);
@@ -16,13 +19,6 @@ void setup() {
   Serial.begin(9600);
   setupWiFiAP();
   setupWebSocket();
-  if(!SPIFFS.begin(true)){
-    Serial.println("Failed to mount SPIFFS");
-    return;
-  }
-  else{
-    Serial.println("Succeded to mount SPIFFS");
-  }
   webServer.on("/", HTTP_GET,handleRoot); // path of the root, when a user asks for the root
   webServer.on("/style.css", HTTP_GET,handleCSS);
   webServer.on("/script.js", HTTP_GET, handleJS);
@@ -31,36 +27,36 @@ void setup() {
 }
 
 void loop() {
-  webServer.handleClient();
-  for(int i=0;i<=2400;i=i+75){
-    sendPWM(i,RotorPin);
-    float distance = calculateDistance();
-    Serial.print("angle :"); 
-    Serial.print(5.6*(i/75)); // this is the angle format
-    if (distance == -1){
-      Serial.println(", no object detected");
-    }
-    else{
-      Serial.print(", distance: ");
-      Serial.print(distance);
-      Serial.println("cm.");
-    }
-    delay(300);
+  sendPWM(currentPWMSignal,RotorPin);
+  float distance = calculateDistance();
+  Serial.print("angle: " + String(5.6*(currentPWMSignal/75))); // this is the angle format
+  if(distance == -1 || distance >= 400){
+    Serial.println(", no object detected.");
   }
-  for(int i=2400;i>=0;i=i-75){
-    sendPWM(i,RotorPin);
-    float distance = calculateDistance();
-    Serial.print("angle :"); 
-    Serial.print(5.6*(i/75)); // this is the angle format
-    if (distance == -1){
-      Serial.println(", no object detected");
+  else{
+    Serial.println(", distance: " + String(distance));
+  }
+  if(forward){
+    if(currentPWMSignal == maximalPWMSignal){
+      forward = false;
+      currentPWMSignal -=75;
     }
     else{
-      Serial.print(", distance: ");
-      Serial.print(distance);
-      Serial.println("cm.");
-   }
-   delay(300);
+      currentPWMSignal += 75;
+    }
+  }
+  else{
+    if(currentPWMSignal == minimalPWMSignal){
+      forward = true;
+      currentPWMSignal +=75;
+    }
+    else{
+      currentPWMSignal -= 75;
+    }
+  }
+  int currentTime = millis();
+  while(millis() - currentTime < 100){
+    webServer.handleClient();
   }
 }
 
@@ -82,6 +78,7 @@ float calculateDistance(){
   else{
     return (time * 0.016565 + 0.00075); // might change it to dependant on temperature
   }
+  delayMicroseconds(25000);
 }
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length) {
   switch (type) {
@@ -110,30 +107,41 @@ void setupWebSocket(){
   webSocket.onEvent(webSocketEvent);
   Serial.println("WebSocket server started");
 }
-void handleRoot(){
-  File file = SPIFFS.open("/index.html", "r");
-    if(!file){
-      webServer.send(404,"text/plain", "File Not Found");
-      return;
-    }
-    webServer.streamFile(file,"text/html");
-    file.close();
+void handleRoot() {
+    const char htmlContent[] PROGMEM = R"rawliteral(
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Hello World</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    background-color: #f4f4f4;
+                }
+                h1 {
+                    color: #333;
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Hello, World!</h1>
+        </body>
+        </html>
+    )rawliteral";
+
+    webServer.send(200, "text/html", htmlContent);
 }
 void handleCSS(){
-  File file = SPIFFS.open("/style.css", "r");
-    if(!file){
-      webServer.send(404,"text/plain", "File Not Found");
-      return;
-    }
-    webServer.streamFile(file,"text/css");
-    file.close();
+  
 }
 void handleJS(){
-  File file = SPIFFS.open("/script.js", "r");
-    if(!file){
-      webServer.send(404,"text/plain", "File Not Found");
-      return;
-    }
-    webServer.streamFile(file,"application/javascript");
-    file.close();
+  
 }

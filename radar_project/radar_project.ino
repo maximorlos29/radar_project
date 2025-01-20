@@ -1,6 +1,5 @@
 #include <WiFi.h> //for the wifi AP
 #include <WebServer.h> // for serving the web app
-#include <SPIFFS.h>
 #include <WebSocketsServer.h> //for the communication between the external device and the radar
 WebSocketsServer webSocket = WebSocketsServer(81);
 WebServer webServer = WebServer(80);

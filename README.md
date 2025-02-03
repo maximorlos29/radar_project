@@ -27,9 +27,8 @@ This project is a functional radar system built using the **ESP32-WROVER microco
   - Protocols: WebSockets for real-time communication.
 
 ## How The System Works (Flow Of Information) (might change it)
-The ESP32 saves in itself 3 files of HTML,JavaScript and CSS, which together form a web app.
 When the ESP32 starts working it sets a WAP (WiFi Access Point) which demands a password of users. 
-And When a user connects to the wifi and inputs the ESP32's IP address in a web explorer, The user gets the files of the web app that are saved in the ESP32's SPIFFS file system.
+And When a user connects to the wifi and inputs the ESP32's IP address in a web explorer, The user gets the files of the web app that are saved as char[] in three variables, each variable is for either HTML code, either CSS or JavaScript.
 When the user gets the web app, the web app shows the data it gets instantenously by WebSocket communication with the ESP32.
 The process of collecting and saving information of the radar, from the sensors, goes the next way: 
 1. The servo motor is set to be on an angle (which will be changed in the next iteration).

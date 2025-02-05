@@ -40,3 +40,9 @@ The process of collecting and saving information of the radar, from the sensors,
 1. Connect the ultrasonic sensor to the ESP32 as per the wiring diagram.
 2. Attach the servo motors for scanning.
 4. Ensure all connections are secure and powered correctly.
+
+##Instructions How To Use
+1. connect to the WiFi private network of the ESP32
+2. enter the needed password of the network
+3. enter any web explorer, and input 192.168.7.1
+And that way you'll enter the radar's web page

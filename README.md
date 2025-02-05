@@ -44,5 +44,5 @@ The process of collecting and saving information of the radar, from the sensors,
 ## Instructions How To Use
 1. connect to the WiFi private network of the ESP32
 2. enter the needed password of the network
-3. enter any web explorer, and input 192.168.7.1
+3. in any web explorer input 192.168.4.1
 And that way you'll enter the radar's web page
